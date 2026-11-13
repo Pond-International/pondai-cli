@@ -23,6 +23,11 @@ concurrency:
 
 jobs:
   publish:
+    # Preview builds publish a GitHub prerelease with a `preview-` tag, which
+    # also fires `release: published`. Only v<semver> tags may reach npm.
+    if: >-
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')) ||
+      (github.event_name == 'workflow_dispatch' && startsWith(inputs.tag, 'v'))
     runs-on: ubuntu-latest
     steps:
       - name: Check out the release tag
