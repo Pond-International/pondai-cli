@@ -1,0 +1,103 @@
+name: Publish npm
+
+# Runs after the private repository publishes a release here. Authentication is
+# npm trusted publishing (OIDC): this workflow holds no npm token.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish, e.g. v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Require npm 11.5.1 or newer
+        shell: bash
+        run: |
+          npm --version
+          node -e '
+          const { execSync } = require("child_process");
+          const [major, minor] = execSync("npm --version").toString().trim().split(".").map(Number);
+          if (major < 11 || (major === 11 && minor < 5)) {
+            console.error("npm >= 11.5.1 is required for trusted publishing");
+            process.exit(1);
+          }'
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          tag="${{ github.event.release.tag_name || inputs.tag }}"
+          case "$tag" in
+            v*) ;;
+            *) echo "tag $tag must start with v" >&2; exit 1 ;;
+          esac
+          version="${tag#v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          case "$version" in
+            *-*) echo "dist_tag=beta" >> "$GITHUB_OUTPUT" ;;
+            *) echo "dist_tag=latest" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Verify the release is complete
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          assets="$(gh api "repos/${{ github.repository }}/releases/tags/${{ steps.version.outputs.tag }}" --jq '.assets[].name')"
+          for name in \
+            pondai-cli_darwin_amd64.tar.gz \
+            pondai-cli_darwin_arm64.tar.gz \
+            pondai-cli_linux_amd64.tar.gz \
+            pondai-cli_linux_arm64.tar.gz \
+            pondai-cli_windows_amd64.zip \
+            pondai-cli_windows_arm64.zip \
+            checksums.txt \
+            install.sh; do
+            if ! printf '%s\n' "$assets" | grep -qx "$name"; then
+              echo "release is missing $name" >&2
+              exit 1
+            fi
+          done
+
+      - name: Refuse to republish a version
+        shell: bash
+        run: |
+          if npm view "@pond-international/cli@${{ steps.version.outputs.version }}" version >/dev/null 2>&1; then
+            echo "version ${{ steps.version.outputs.version }} is already published" >&2
+            exit 1
+          fi
+
+      - name: Set package version
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
+
+      - name: Publish
+        run: npm publish --access public --tag "${{ steps.version.outputs.dist_tag }}"

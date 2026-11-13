@@ -1,0 +1,29 @@
+{
+  "name": "@pond-international/cli",
+  "version": "0.1.0",
+  "description": "Pond Agent Solutions local lifecycle manager",
+  "license": "UNLICENSED",
+  "private": false,
+  "bin": {
+    "pondai-cli": "scripts/run.js"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install.js"
+  },
+  "files": [
+    "scripts/install.js",
+    "scripts/run.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pond-International/pondai-cli.git"
+  },
+  "homepage": "https://github.com/Pond-International/pondai-cli"
+}

@@ -1,10 +1,11 @@
-# pondai CLI
+# pondai-cli
 
-Public release repository for the `pondai` command-line interface.
+Public release repository for the `pondai-cli` command-line interface.
 
-The source code is maintained in a private repository. This repository contains
-only release artifacts, their SHA-256 checksums, and the install script. It does
-not contain source code.
+The CLI source is maintained in a private repository. This repository holds the
+npm bootstrap package (`@pond-international/cli`), the npm publish workflow, and
+the release artifacts, checksums, and install script. It does not contain the
+CLI source code.
 
 ## Install
 
@@ -21,15 +22,17 @@ and refuses to install on a mismatch.
 With Node.js 18 or newer:
 
 ```sh
-npx @pondai/cli@latest version
+npx @pond-international/cli@latest version
 ```
 
 ```sh
-npm install -g @pondai/cli
+npm install -g @pond-international/cli
+pondai-cli version
 ```
 
-The npm package contains no binary. It downloads the matching release archive,
-verifies it against `checksums.txt`, and runs the native executable.
+The npm package contains no binary. It downloads the release archive that
+matches its own version, verifies it against `checksums.txt`, and runs the
+native `pondai-cli` executable.
 
 ## Release assets
 
@@ -53,6 +56,15 @@ shasum -a 256 -c checksums.txt --ignore-missing
 ```
 
 On Linux, use `sha256sum -c checksums.txt --ignore-missing`.
+
+## Repository layout
+
+```text
+package.json                     npm bootstrap, no binary and no business logic
+scripts/install.js               downloads and verifies the archive on install
+scripts/run.js                   launches the native binary
+.github/workflows/publish-npm.yml  publishes the npm package from a release
+```
 
 ## Mirrors
 
