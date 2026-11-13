@@ -38,20 +38,20 @@ native `pondai-cli` executable.
 
 | Asset | Platform |
 | --- | --- |
-| `pondai_<version>_darwin_amd64.tar.gz` | macOS, Intel |
-| `pondai_<version>_darwin_arm64.tar.gz` | macOS, Apple Silicon |
-| `pondai_<version>_linux_amd64.tar.gz` | Linux, x86-64 |
-| `pondai_<version>_linux_arm64.tar.gz` | Linux, arm64 |
-| `pondai_<version>_windows_amd64.zip` | Windows, x86-64 |
-| `pondai_<version>_windows_arm64.zip` | Windows, arm64 |
+| `pondai-cli_darwin_amd64.tar.gz` | macOS, Intel |
+| `pondai-cli_darwin_arm64.tar.gz` | macOS, Apple Silicon |
+| `pondai-cli_linux_amd64.tar.gz` | Linux, x86-64 |
+| `pondai-cli_linux_arm64.tar.gz` | Linux, arm64 |
+| `pondai-cli_windows_amd64.zip` | Windows, x86-64 |
+| `pondai-cli_windows_arm64.zip` | Windows, arm64 |
 | `checksums.txt` | SHA-256 digest for every archive |
 | `install.sh` | Install script |
 
 ## Verify a download manually
 
 ```sh
-curl -fsSLO https://github.com/Pond-International/pondai-cli/releases/download/v0.1.0/pondai_0.1.0_darwin_arm64.tar.gz
-curl -fsSLO https://github.com/Pond-International/pondai-cli/releases/download/v0.1.0/checksums.txt
+curl -fsSLO https://github.com/Pond-International/pondai-cli/releases/latest/download/pondai-cli_darwin_arm64.tar.gz
+curl -fsSLO https://github.com/Pond-International/pondai-cli/releases/latest/download/checksums.txt
 shasum -a 256 -c checksums.txt --ignore-missing
 ```
 
